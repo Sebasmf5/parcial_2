@@ -33,22 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadResumen();
   }
 
-  /// Carga el resumen inicial: total de accidentes y establecimientos.
   Future<void> _loadResumen() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    setState(() { _isLoading = true; _error = null; });
 
     try {
-      // Ejecutar ambas peticiones en paralelo
       final results = await Future.wait([
         _accidenteService.fetchAccidentes(),
         _establecimientoService.getAll(),
       ]);
 
       if (!mounted) return;
-
       setState(() {
         _totalAccidentes = (results[0] as List).length;
         _totalEstablecimientos = (results[1] as List).length;
@@ -56,27 +50,14 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      setState(() { _error = e.toString(); _isLoading = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F23),
-      appBar: AppBar(
-        title: const Text(
-          'Parcial 2 — Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF1A1A2E),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: const Color(0xFF0B1121),
       body: _isLoading
           ? const SkeletonDashboard()
           : _error != null
@@ -92,44 +73,43 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: Colors.red[300],
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B6B).withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.wifi_off_rounded,
+                size: 48,
+                color: Color(0xFFFF6B6B),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Error al cargar datos',
+            const SizedBox(height: 20),
+            const Text(
+              'Sin conexión',
               style: TextStyle(
-                color: Colors.red[300],
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              _error!,
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
+              'No se pudieron cargar los datos.\nVerifica tu conexión a internet.',
+              style: TextStyle(color: Colors.grey[500], fontSize: 14, height: 1.5),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
+            const SizedBox(height: 28),
+            FilledButton.icon(
               onPressed: _loadResumen,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
               label: const Text('Reintentar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF7C5CFC),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],
@@ -139,131 +119,182 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Título de bienvenida
-          const Text(
-            '¡Bienvenido!',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            // Header
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7C5CFC), Color(0xFF38BDF8)],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.dashboard_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Parcial 2',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    Text(
+                      'Desarrollo Móvil',
+                      style: TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Panel de control del parcial',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 15,
+            const SizedBox(height: 28),
+
+            // Resumen stats
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF131B2E),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF1E293B)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildStatItem(
+                      icon: Icons.car_crash_rounded,
+                      value: _totalAccidentes.toString(),
+                      label: 'Accidentes',
+                      color: const Color(0xFF38BDF8),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 48,
+                    color: const Color(0xFF1E293B),
+                  ),
+                  Expanded(
+                    child: _buildStatItem(
+                      icon: Icons.storefront_rounded,
+                      value: _totalEstablecimientos.toString(),
+                      label: 'Establecimientos',
+                      color: const Color(0xFF34D399),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-          // Resumen con totales
-          _buildResumenCard(),
-          const SizedBox(height: 24),
-
-          // Sección de módulos
-          Text(
-            'Módulos',
-            style: TextStyle(
-              color: Colors.grey[300],
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+            // Sección módulos
+            const Text(
+              'MÓDULOS',
+              style: TextStyle(
+                color: Color(0xFF64748B),
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
-          // Card — Estadísticas de Accidentes
-          DashboardCard(
-            icon: Icons.bar_chart_rounded,
-            title: 'Estadísticas de Accidentes',
-            subtitle: '$_totalAccidentes accidentes registrados en Tuluá',
-            gradientColors: const [Color(0xFF667EEA), Color(0xFF764BA2)],
-            onTap: () => context.pushNamed('estadisticas'),
-          ),
-          const SizedBox(height: 16),
+            // Card Accidentes
+            DashboardCard(
+              icon: Icons.bar_chart_rounded,
+              title: 'Estadísticas de Accidentes',
+              subtitle: '$_totalAccidentes registros de Tuluá procesados con Isolate',
+              gradientColors: const [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+              onTap: () => context.pushNamed('estadisticas'),
+            ),
+            const SizedBox(height: 14),
 
-          // Card — Gestión de Establecimientos
-          DashboardCard(
-            icon: Icons.store_rounded,
-            title: 'Gestión de Establecimientos',
-            subtitle: '$_totalEstablecimientos establecimientos registrados',
-            gradientColors: const [Color(0xFFF093FB), Color(0xFFF5576C)],
-            onTap: () => context.pushNamed('establecimientos'),
-          ),
-        ],
-      ),
-    );
-  }
+            // Card Establecimientos
+            DashboardCard(
+              icon: Icons.storefront_rounded,
+              title: 'Gestión de Establecimientos',
+              subtitle: '$_totalEstablecimientos registros — CRUD con carga de logo',
+              gradientColors: const [Color(0xFF0EA5E9), Color(0xFF38BDF8)],
+              onTap: () => context.pushNamed('establecimientos'),
+            ),
+            const SizedBox(height: 28),
 
-  Widget _buildResumenCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+            // Footer info
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF131B2E),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF1E293B)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, color: Colors.grey[600], size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Datos de accidentes: Datos Abiertos Colombia\nEstablecimientos: API Parking VisionTIC',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12, height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildResumenItem(
-              icon: Icons.car_crash_rounded,
-              label: 'Accidentes',
-              value: _totalAccidentes.toString(),
-              color: const Color(0xFF667EEA),
-            ),
-          ),
-          Container(
-            width: 1,
-            height: 50,
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
-          Expanded(
-            child: _buildResumenItem(
-              icon: Icons.store_rounded,
-              label: 'Establecimientos',
-              value: _totalEstablecimientos.toString(),
-              color: const Color(0xFFF5576C),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildResumenItem({
+  Widget _buildStatItem({
     required IconData icon,
-    required String label,
     required String value,
+    required String label,
     required Color color,
   }) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 22),
+        ),
+        const SizedBox(height: 10),
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.grey[500],
-            fontSize: 13,
+          style: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

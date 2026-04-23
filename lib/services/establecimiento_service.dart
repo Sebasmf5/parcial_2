@@ -110,12 +110,11 @@ class EstablecimientoService {
   }
 
   // ---------------------------------------------------------------------------
-  // POST /establecimiento-update/{id} — Editar (method spoofing _method=PUT)
+  // POST /establecimiento-update/{id} — Editar
   // ---------------------------------------------------------------------------
-  /// Actualiza el establecimiento con [id] usando method spoofing de Laravel.
+  /// Actualiza el establecimiento con [id].
   ///
-  /// Se envía como POST con el campo `_method=PUT` en el form-data.
-  /// Si [logoFile] no es null, se adjunta el nuevo logo.
+  /// Se envía como POST. Si [logoFile] no es null, se adjunta el nuevo logo.
   Future<Establecimiento> update(
     int id,
     Establecimiento establecimiento, {
@@ -123,7 +122,6 @@ class EstablecimientoService {
   }) async {
     try {
       final formMap = <String, dynamic>{
-        '_method': 'PUT',
         'nombre': establecimiento.nombre,
         'nit': establecimiento.nit,
         'direccion': establecimiento.direccion,
@@ -140,7 +138,7 @@ class EstablecimientoService {
       final formData = FormData.fromMap(formMap);
 
       final response = await _dio.post(
-        '/establecimientos/$id',
+        '/establecimiento-update/$id',
         data: formData,
       );
       final data = response.data;

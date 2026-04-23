@@ -31,30 +31,18 @@ class _ListadoScreenState extends State<ListadoScreen> {
     _loadEstablecimientos();
   }
 
-  /// Carga la lista de establecimientos desde la API.
   Future<void> _loadEstablecimientos() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
+    setState(() { _isLoading = true; _error = null; });
     try {
       final result = await _service.getAll();
       if (!mounted) return;
-      setState(() {
-        _establecimientos = result;
-        _isLoading = false;
-      });
+      setState(() { _establecimientos = result; _isLoading = false; });
     } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      setState(() { _error = e.toString(); _isLoading = false; });
     }
   }
 
-  /// Construye la URL completa del logo del establecimiento.
   String _buildLogoUrl(String? logo) {
     if (logo == null || logo.isEmpty) return '';
     final baseUrl = dotenv.env['PARKING_LOGOS_URL'] ?? '';
@@ -64,30 +52,28 @@ class _ListadoScreenState extends State<ListadoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F23),
+      backgroundColor: const Color(0xFF0B1121),
       appBar: AppBar(
-        title: const Text(
-          'Establecimientos',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text('Establecimientos',
+            style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.3)),
+        backgroundColor: const Color(0xFF0B1121),
         foregroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
       body: _isLoading
           ? const SkeletonList()
           : _error != null
               ? _buildErrorState()
               : _buildList(),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Navegar al formulario de creación y recargar al volver
           await context.pushNamed('establecimiento-crear');
           _loadEstablecimientos();
         },
-        backgroundColor: const Color(0xFF6C63FF),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Nuevo', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF7C5CFC),
+        elevation: 6,
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
     );
   }
@@ -99,33 +85,29 @@ class _ListadoScreenState extends State<ListadoScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline_rounded, size: 64, color: Colors.red[300]),
-            const SizedBox(height: 16),
-            Text(
-              'Error al cargar establecimientos',
-              style: TextStyle(
-                color: Colors.red[300],
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF6B6B).withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
+              child: const Icon(Icons.error_outline_rounded, size: 48, color: Color(0xFFFF6B6B)),
             ),
+            const SizedBox(height: 20),
+            const Text('Error al cargar',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
-            Text(
-              _error!,
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
+            Text(_error!, style: TextStyle(color: Colors.grey[500], fontSize: 14), textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            ElevatedButton.icon(
+            FilledButton.icon(
               onPressed: _loadEstablecimientos,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
               label: const Text('Reintentar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6C63FF),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF7C5CFC),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],
@@ -140,12 +122,12 @@ class _ListadoScreenState extends State<ListadoScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.store_outlined, size: 64, color: Colors.grey[600]),
-            const SizedBox(height: 16),
-            Text(
-              'No hay establecimientos registrados',
-              style: TextStyle(color: Colors.grey[400], fontSize: 16),
-            ),
+            Icon(Icons.storefront_outlined, size: 56, color: Colors.grey[700]),
+            const SizedBox(height: 14),
+            Text('Sin establecimientos',
+                style: TextStyle(color: Colors.grey[500], fontSize: 16, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 4),
+            Text('Toca + para crear uno nuevo', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
           ],
         ),
       );
@@ -153,87 +135,105 @@ class _ListadoScreenState extends State<ListadoScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadEstablecimientos,
-      color: const Color(0xFF6C63FF),
+      color: const Color(0xFF7C5CFC),
+      backgroundColor: const Color(0xFF131B2E),
       child: ListView.builder(
         itemCount: _establecimientos.length,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
         itemBuilder: (context, index) {
           final est = _establecimientos[index];
-          return _buildEstablecimientoCard(est);
+          return _buildCard(est);
         },
       ),
     );
   }
 
-  Widget _buildEstablecimientoCard(Establecimiento est) {
+  Widget _buildCard(Establecimiento est) {
     final logoUrl = _buildLogoUrl(est.logo);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 50,
-            height: 50,
-            color: const Color(0xFF2A2A3E),
-            child: logoUrl.isNotEmpty
-                ? Image.network(
-                    logoUrl,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, e, s) => const Icon(
-                      Icons.store_rounded,
-                      color: Color(0xFF6C63FF),
-                    ),
-                  )
-                : const Icon(
-                    Icons.store_rounded,
-                    color: Color(0xFF6C63FF),
-                  ),
-          ),
+    return GestureDetector(
+      onTap: () async {
+        await context.pushNamed(
+          'establecimiento-detalle',
+          pathParameters: {'id': est.id.toString()},
+        );
+        _loadEstablecimientos();
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFF131B2E),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFF1E293B)),
         ),
-        title: Text(
-          est.nombre,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            const SizedBox(height: 4),
-            Text(
-              'NIT: ${est.nit}',
-              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+            // Logo
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                width: 52,
+                height: 52,
+                color: const Color(0xFF1E293B),
+                child: logoUrl.isNotEmpty
+                    ? Image.network(logoUrl, width: 52, height: 52, fit: BoxFit.cover,
+                        errorBuilder: (_, e, s) => const Icon(Icons.storefront_rounded, color: Color(0xFF7C5CFC), size: 24))
+                    : const Icon(Icons.storefront_rounded, color: Color(0xFF7C5CFC), size: 24),
+              ),
             ),
-            Text(
-              est.direccion,
-              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            const SizedBox(width: 14),
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    est.nombre,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.badge_outlined, size: 13, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text('NIT: ${est.nit}',
+                          style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined, size: 13, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(est.direccion,
+                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Arrow
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.chevron_right_rounded, color: Colors.grey[500], size: 20),
             ),
           ],
         ),
-        trailing: Icon(
-          Icons.chevron_right_rounded,
-          color: Colors.grey[600],
-        ),
-        onTap: () async {
-          // Navegar al detalle y recargar al volver
-          await context.pushNamed(
-            'establecimiento-detalle',
-            pathParameters: {'id': est.id.toString()},
-          );
-          _loadEstablecimientos();
-        },
       ),
     );
   }
