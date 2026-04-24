@@ -203,32 +203,31 @@ PARKING_LOGOS_URL=https://parking.visiontic.com.co/logos
 
 ## Capturas de Pantalla
 
-> *(Agregar capturas aquí)*
-
 ### Dashboard
 *(Captura del HomeScreen con resumen de totales y cards de navegación)*
+[image](/ScreenShoot/dashboard.png)
 
 ### Estadísticas de Accidentes
 *(4 capturas — una por cada gráfica: PieChart clase, PieChart gravedad, BarChart top 5 barrios, BarChart días)*
+[image](/ScreenShoot/Estadistica1.jpg)
+[image](/ScreenShoot/EstadisticaII.jpg)
 
 ### Listado de Establecimientos
 *(Captura con Skeletonizer cargando + captura con datos cargados)*
+[image](/ScreenShoot/skeleteon.png)
+[image](/ScreenShoot/get.png)
 
 ### Formulario Crear
 *(Captura del formulario vacío con selector de imagen)*
+[image](/ScreenShoot/post.png)
 
 ### Formulario Editar
 *(Captura del formulario precargado con datos del establecimiento)*
+[image](/ScreenShoot/deleteANDupadte.png)
 
 ### Eliminación
 *(Captura del diálogo de confirmación de eliminación)*
-
-### Consola — Isolate
-*(Captura mostrando los prints: [Isolate] Iniciado... y [Isolate] Completado...)*
-
----
-
-## Flujo GitFlow
+[image](/ScreenShoot/eliminar.jpg)
 
 ```
 main ← dev ← feature/parcial_flutter_final
